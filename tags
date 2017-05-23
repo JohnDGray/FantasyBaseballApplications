@@ -1,0 +1,81 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DraftState	DraftAssistant.py	/^class DraftState():$/;"	c
+FirstDraftState	DraftAssistant.py	/^class FirstDraftState(DraftState):$/;"	c
+League	Modules/FBClasses.py	/^class League():$/;"	c
+League	ValueCalculator.py	/^class League():$/;"	c
+Player	DraftAssistant.py	/^class Player():$/;"	c
+Player	Modules/FBClasses.py	/^class Player:$/;"	c
+Player	ValueCalculator.py	/^class Player:$/;"	c
+PlayerValue	ValueCalculator.py	/^class PlayerValue(Player):$/;"	c
+RateStatistic	Modules/FBClasses.py	/^class RateStatistic(Statistic):$/;"	c
+RateStatistic	ValueCalculator.py	/^class RateStatistic(Statistic):$/;"	c
+Statistic	Modules/FBClasses.py	/^class Statistic():$/;"	c
+Statistic	ValueCalculator.py	/^class Statistic():$/;"	c
+__init__	DraftAssistant.py	/^                 budget: int, values: list):$/;"	m	class:FirstDraftState
+__init__	DraftAssistant.py	/^                 sub_index: int):$/;"	m	class:DraftState
+__init__	DraftAssistant.py	/^    def __init__(self, name, team, positions, value):$/;"	m	class:Player
+__init__	Modules/FBClasses.py	/^                 value: float=None):$/;"	m	class:Player
+__init__	Modules/FBClasses.py	/^    def __init__(self, name: str, invert: bool=False):$/;"	m	class:Statistic
+__init__	Modules/FBClasses.py	/^    def __init__(self, name: str, qualifier: Statistic, invert: bool=False):$/;"	m	class:RateStatistic
+__init__	Modules/FBClasses.py	/^    def __init__(teams: int, budget: int, hitter_stats: list, $/;"	m	class:League
+__init__	ValueCalculator.py	/^                 hitter: bool):$/;"	m	class:Player
+__init__	ValueCalculator.py	/^    def __init__(player: Player, value: int):$/;"	m	class:PlayerValue
+__init__	ValueCalculator.py	/^    def __init__(self, name: str, invert: bool = False):$/;"	m	class:Statistic
+__init__	ValueCalculator.py	/^    def __init__(self, name: str, invert: bool, qualifier: Statistic):$/;"	m	class:RateStatistic
+__init__	ValueCalculator.py	/^    def __init__(teams: int, budget: int, hitter_stats: list, $/;"	m	class:League
+__str__	DraftAssistant.py	/^    def __str__(self):$/;"	m	class:Player	file:
+adjust_slots	DraftAssistant.py	/^    def adjust_slots(self):$/;"	m	class:DraftState
+assign_values	ValueCalculator.py	/^def assign_values(players: list, stat_values: dict) -> list:$/;"	f
+budget	ValueCalculator.py	/^budget = 260$/;"	v
+copy	DraftAssistant.py	/^    def copy(self) -> 'DraftState':$/;"	m	class:DraftState
+determine_stat_values	ValueCalculator.py	/^def determine_stat_values(players: list, league: League) -> dict:$/;"	f
+determine_values	ValueCalculator.py	/^    def determine_values(players: list, league: League) -> dict:$/;"	f	function:determine_stat_values
+display_value	DraftAssistant.py	/^            display_value = str(result.name).ljust(20)$/;"	v
+draft	DraftAssistant.py	/^    def draft(self, value: int) -> None:$/;"	m	class:DraftState
+draft_states	DraftAssistant.py	/^draft_states = []$/;"	v
+generate_hitter_statistics	ValueCalculator.py	/^def generate_hitter_statistics():$/;"	f
+generate_hitters	ValueCalculator.py	/^def generate_hitters(path: str, indices: dict) -> list:$/;"	f
+generate_pitcher_statistics	ValueCalculator.py	/^def generate_pitcher_statistics():$/;"	f
+generate_pitchers	ValueCalculator.py	/^def generate_pitchers(path: str, indices: dict) -> list:$/;"	f
+generate_positions	ValueCalculator.py	/^def generate_positions():$/;"	f
+get_dollar_vals	ValueCalculator.py	/^def get_dollar_vals(player_values: list, league: League, rep_values: dict)$/;"	f
+get_hitter_positions	Modules/FBClasses.py	/^def get_hitter_positions():$/;"	f
+get_players_with_values	test.py	/^def get_players_with_values(team: str, position: str):$/;"	f
+get_razzball_players	test.py	/^def get_razzball_players():$/;"	f
+get_razzball_players	test2.py	/^def get_razzball_players():$/;"	f
+get_rep_values	ValueCalculator.py	/^def get_rep_values(player_values: list, league: League) -> dict:$/;"	f
+get_slots	DraftAssistant.py	/^    def get_slots(self) -> list:$/;"	m	class:DraftState
+get_yahoo_players	test.py	/^def get_yahoo_players(team: str, position: str):$/;"	f
+hitter_indices	ValueCalculator.py	/^hitter_indices = {'name': 1, 'team': 2, 'positions': 5}$/;"	v
+hitter_stats	ValueCalculator.py	/^hitter_stats = generate_hitter_statistics()$/;"	v
+hitters	ValueCalculator.py	/^hitters = generate_hitters(sys.argv[1], hitter_indices)$/;"	v
+last_state	DraftAssistant.py	/^    last_state = draft_states[-1]$/;"	v
+league	ValueCalculator.py	/^league = League(teams, budget, hitter_stats, pitcher_stats, positions)$/;"	v
+modify_value	DraftAssistant.py	/^def modify_value(slots, value):$/;"	f
+next_state	DraftAssistant.py	/^    next_state = last_state.copy()$/;"	v
+next_value	DraftAssistant.py	/^        next_value = int(next_value)$/;"	v
+next_value	DraftAssistant.py	/^    next_value = input("Enter a value\\n")$/;"	v
+pitcher	ValueCalculator.py	/^pitcher = {'name': 1, 'team': 2, 'positions': 3}$/;"	v
+pitcher_stats	ValueCalculator.py	/^pitcher_stats = generate_pitcher_statistics()$/;"	v
+pitchers	ValueCalculator.py	/^pitchers = generate_pitchers(sys.argv[1], pitcher_indices)$/;"	v
+pitchers	ValueCalculator.py	/^pitchers = generate_pitchers(sys.argv[2], pitcher_indices)$/;"	v
+players	DraftAssistant.py	/^players = process_projections(sys.argv[1])$/;"	v
+players_to_draft	ValueCalculator.py	/^def players_to_draft(player_values: list, league: League) -> list:$/;"	f
+position	test.py	/^position = sys.argv[2]$/;"	v
+positions	ValueCalculator.py	/^positions = generate_positions()$/;"	v
+process_projections	DraftAssistant.py	/^def process_projections(projections_path: str) -> list:$/;"	f
+razzball_players	test.py	/^razzball_players = get_players_with_values(sys.argv[1], sys.argv[2])$/;"	v
+results	DraftAssistant.py	/^        results = [p for p in players if next_value.lower() in p.name.lower()]$/;"	v
+results	DraftAssistant.py	/^        results = [p for p in results if p.value > 0 or abs(p.value) < 10]$/;"	v
+sort_player_values	ValueCalculator.py	/^def sort_player_values(player_values: list) -> None:$/;"	f
+team	test.py	/^team = sys.argv[1]$/;"	v
+teams	ValueCalculator.py	/^teams = 12$/;"	v
+values	DraftAssistant.py	/^values = None$/;"	v
+values	DraftAssistant.py	/^values = [p.value for p in players]$/;"	v
+values	test2.py	/^    values = ['"'+str(s)+'"' for s in values]$/;"	v
+values	test2.py	/^    values = [player['name'], player['team'], player['pos'], player['val']]$/;"	v

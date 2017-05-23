@@ -34,8 +34,8 @@ class PlayerValue(Player):
         self.value = value
 
 
-def sort_player_values(player_values: list) -> list:
-    return player_values.sort(key = lambda x: x.value, reverse = True)
+def sort_player_values(player_values: list) -> None:
+    player_values.sort(key = lambda x: x.value, reverse = True)
 
 def assign_values(players: list, stat_values: dict) -> list:
     output = []
@@ -53,7 +53,8 @@ def assign_values(players: list, stat_values: dict) -> list:
     return output
 
 def players_to_draft(player_values: list, league: League) -> list:
-    player_values = sort_player_values(player_values)
+    player_values = player_values[:]
+    sort_player_values(player_values)
     players = []
     positions = league.positions
     teams = league.teams
@@ -61,8 +62,8 @@ def players_to_draft(player_values: list, league: League) -> list:
         num = positions[position] * teams
         players.extend([x for x in player_values if
             x.position == position][0:num])
+        player_values = [x for x in player_values if not x in players]
     return players
-
 
 def determine_stat_values(players: list, league: League) -> dict:
     def determine_values(players: list, league: League) -> dict:
@@ -99,11 +100,6 @@ def get_dollar_vals(player_values: list, league: League, rep_values: dict)
     return [PlayerValue(p, total_dollars * (p.value / total_value))
             for p in player_values]
     
-
-def process_league_conf(path: str) -> League:
-    with open(path, 'r') as league_conf:
-        teams = int(league_conf.next)
-
 def generate_hitter_statistics():
     hitter_stats = []
     ab = Statistic("ab")
@@ -140,25 +136,41 @@ def generate_positions():
     positions['p'] = 4
     return positions
 
-def generate_players(hitter_path: str, hitter_indices: dict, \
-                     pitcher_path: str, pitcher_indices: dict) -> list:
+def generate_hitters(path: str, indices: dict) -> list:
     hitters = []
-    with open(hitter_path, 'r') as hitter_file:
+    with open(path, 'r') as hitter_file:
         r = reader(hitter_file)
         next(r)
         for line in r:
-            name = line[hitter_indices['name']]
-            team = line[hitter_indices['team']]
-            positions = line[hitter_indices['positions']].split('/')
+            name = line[indices['name']]
+            team = line[indices['team']]
+            positions = line[indices['positions']].split('/')
             positions = [p.strip() for p in positions if p.strip()]
+            del indices['name']
+            del indices['team']
+            del indices['positions']
             stats = {}
-            for stat, index in hitter_indices:
-                stats[stat] = line[index]
+            for stat, index in indices:
+                stats[stat] = float(line[index])
+            hitters.append(Player(name, team, positions, stats, True))
 
-
-
-            
-
+def generate_pitchers(path: str, indices: dict) -> list:
+    pitchers = []
+    with open(path, 'r') as hitter_file:
+        r = reader(hitter_file)
+        next(r)
+        for line in r:
+            name = line[indices['name']]
+            team = line[indices['team']]
+            positions = line[indices['positions']].split('/')
+            positions = [p.strip() for p in positions if p.strip()]
+            del indices['name']
+            del indices['team']
+            del indices['positions']
+            stats = {}
+            for stat, index in indices:
+                stats[stat] = float(line[index])
+            pitchers.append(Player(name, team, positions, stats, True))
 
 teams = 12
 budget = 260
@@ -167,8 +179,34 @@ pitcher_stats = generate_pitcher_statistics()
 positions = generate_positions()
 
 league = League(teams, budget, hitter_stats, pitcher_stats, positions)
-
-hitters = []
-pitchers = []
+hitter_indices = {'name': 1, 'team': 2, 'positions': 5}
+hitter_indices[next(x for x in league.hitter_statistics \
+               if x.name.lower().strip() == "ab"] = 8
+hitter_indices[next(x for x in league.hitter_statistics \
+               if x.name.lower().strip() == "r"] = 9
+hitter_indices[next(x for x in league.hitter_statistics \
+               if x.name.lower().strip() == "hr"] = 10
+hitter_indices[next(x for x in league.hitter_statistics \
+               if x.name.lower().strip() == "rbi"] = 11
+hitter_indices[next(x for x in league.hitter_statistics \
+               if x.name.lower().strip() == "sb"] = 12
+hitter_indices[next(x for x in league.hitter_statistics \
+               if x.name.lower().strip() == "avg"] = 24
+hitters = generate_hitters(sys.argv[1], hitter_indices)
+pitcher = {'name': 1, 'team': 2, 'positions': 3}
+pitcher_indices[next(x for x in league.pitcher_statistics \
+               if x.name.lower().strip() == "ip"] = 9
+pitcher_indices[next(x for x in league.pitcher_statistics \
+               if x.name.lower().strip() == "w"] = 10
+pitcher_indices[next(x for x in league.pitcher_statistics \
+               if x.name.lower().strip() == "sv"] = 12
+pitcher_indices[next(x for x in league.pitcher_statistics \
+               if x.name.lower().strip() == "k"] = 17
+pitcher_indices[next(x for x in league.pitcher_statistics \
+               if x.name.lower().strip() == "era"] = 14
+pitcher_indices[next(x for x in league.pitcher_statistics \
+               if x.name.lower().strip() == "whip"] = 16
+pitchers = generate_pitchers(sys.argv[1], pitcher_indices)
+pitchers = generate_pitchers(sys.argv[2], pitcher_indices)
 
 
