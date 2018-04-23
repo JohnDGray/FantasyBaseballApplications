@@ -13,17 +13,17 @@ def get_yahoo_players(team: str, position: str):
     is_hitter = bool(position in get_hitter_positions())
     yahoo_players = []
 
-    first_url = "https://baseball.fantasysports.yahoo.com/b1/19816/\
+    first_url = "https://baseball.fantasysports.yahoo.com/b1/5983/\
 players?&sort=OR&sdir=1&status="
     first_url += str(team)
     first_url += "&pos="
     first_url += position
     first_url += "&stat1=S_S_2016&jsenabled=1"
 
-    subsequent_url = "https://baseball.fantasysports.yahoo.com/b1/19816/\
+    subsequent_url = "https://baseball.fantasysports.yahoo.com/b1/5983/\
 players?status=A&pos="
     subsequent_url += position
-    subsequent_url += "&cut_type=33&stat1=S_S_2016&myteam=0&\
+    subsequent_url += "&cut_type=33&stat1=S_S_2017&myteam=0&\
 sort=OR&sdir=1&count=" 
     #        sys.stdout.write('\n')
 
@@ -66,7 +66,7 @@ sort=OR&sdir=1&count="
 def get_razzball_players():
     razzball_players = []
 
-    with open('/home/simon/Downloads/razzball.csv', 'r') as razz_csv:
+    with open('/home/user/Downloads/razzball.csv', 'r') as razz_csv:
         r = reader(razz_csv)
         next(r)
         for line in r:
