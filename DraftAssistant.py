@@ -33,6 +33,8 @@ class DraftState():
         return output
 
     def draft(self, value: int) -> None:
+        if value <= 0:
+            raise ValueError("cannot draft a player for less than 1 dollar")
         if value > sum([val-1 for val in self.slots]) + 1:
             raise ValueError("value exceeds maximum allowable value")
         self.budget -= value
@@ -80,6 +82,8 @@ def process_projections(projections_path: str) -> list:
         r = reader(projections)
         next(r)
         for line in r:
+            if not line[4]:
+                continue
             positions = line[3].split('/')
             p = Player(line[1], line[2], positions, line[5])  
             players.append(p)
@@ -91,14 +95,17 @@ draft_states = []
 draft_states.append(FirstDraftState(23, 12, 260, values))
 values = None
 
+def get_max_bid(slots):
+    return 1 + sum([x-1 for x in slots])
+
 def modify_value(slots, value):
+    max_bid = get_max_bid(slots) 
+    discount_value = 0.9 * value
     highest_value = max(slots)
-    if value <= highest_value:
-        return value
-    diff = value - highest_value
-    diff //= 3
-    diff *= 2
-    return highest_value + diff
+    diff = discount_value - highest_value
+    diff /= 10
+    diff *= 9
+    return min(max_bid, discount_value, highest_value+diff)
 
 while True:
     last_state = draft_states[-1]
@@ -109,20 +116,38 @@ while True:
     try:
         next_value = int(next_value)
     except ValueError:
-        if next_value and len(next_value) == 4 and \
-           next_value.lower().strip() == "undo" and \
-           len(draft_states) > 1:
-            print("Undoing last pick")
-            draft_states.pop()
+        arguments = next_value.split()
+        results = []
+        if not len(arguments):
+            print("please supply an argument")
+            print("examples:")
+            print("-u to undo last change")
+            print("-p 2b to search for second basemen")
+            print("stant to search for players with 'stant' in their names")
             continue
-        results = [p for p in players if next_value.lower() in p.name.lower()]
-        results = [p for p in results if p.value > 0 or abs(p.value) < 10]
+        elif arguments[0].startswith("-u"):
+            if len(draft_states) > 1:
+                print("Undoing last pick")
+                draft_states.pop()
+            else:
+                print("Cannot undo since nothing has happened yet")
+            continue
+        elif arguments[0].startswith("-p"):
+            if len(arguments) < 2:
+                print("Usage: -p {position}")
+                continue
+            position_to_get = arguments[1].lower()
+            results = [p for p in players if any([pos for pos in p.positions if position_to_get in pos.lower()])]
+        else:
+            results = [p for p in players if next_value.lower() in p.name.lower()]
+        results = [r for r in results if r.value > 0 or abs(r.value) < 10]
+        results = results[:40]
         for result in results:
             display_value = str(result.name).ljust(20)
             display_value += str(result.team).ljust(5)
             display_value += '/'.join(result.positions).ljust(15)
             display_value += \
-                str(modify_value(last_state.slots, result.value)).ljust(10)
+                str(int(modify_value(last_state.slots, result.value))).ljust(10)
             display_value += str(result.value).ljust(10)
             print(display_value)
         print()
