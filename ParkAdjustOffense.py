@@ -100,7 +100,7 @@ def get_runs_per_game_all():
 
 def get_park_factors():
     teams_with_park_factors = []
-    with open('/home/user/Documents/ParkFactors2018.csv', 'r') as park_factors:
+    with open('ParkFactors2018.csv', 'r') as park_factors:
         csv = reader(park_factors)
         for row in csv:
             team_name = row[0]
