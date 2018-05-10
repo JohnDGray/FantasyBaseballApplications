@@ -66,7 +66,7 @@ sort=OR&sdir=1&count="
 def get_razzball_players():
     razzball_players = []
 
-    with open('/home/user/Downloads/razzball.csv', 'r') as razz_csv:
+    with open('razzball.csv', 'r') as razz_csv:
         r = reader(razz_csv)
         next(r)
         for line in r:
