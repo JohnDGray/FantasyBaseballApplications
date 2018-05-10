@@ -7,15 +7,15 @@ teams=( 2070ParadigmShift TheSydneyWombats BaseballBat Steerbrenner \
 
 for i in {1..12}
 do
-    python3 /home/user/Documents/FantasyBaseballApplications/test.py $i B sum > "/home/user/Documents/FantasyBaseballApplications/\
+  python3 $HOME/Documents/FantasyBaseballApplications/test.py $i B sum > "$HOME/Documents/FantasyBaseballApplications/\
 Output/${teams[$i-1]}"
-    python3 /home/user/Documents/FantasyBaseballApplications/test.py $i B list >> "/home/user/Documents/FantasyBaseballApplications/\
+  python3 $HOME/Documents/FantasyBaseballApplications/test.py $i B list >> "$HOME/Documents/FantasyBaseballApplications/\
 Output/${teams[$i-1]}"
-    echo "" >> "/home/user/Documents/FantasyBaseballApplications/\
+  echo "" >> "$HOME/Documents/FantasyBaseballApplications/\
 Output/${teams[$i-1]}"
-    python3 /home/user/Documents/FantasyBaseballApplications/test.py $i P sum >> "/home/user/Documents/FantasyBaseballApplications/\
+  python3 $HOME/Documents/FantasyBaseballApplications/test.py $i P sum >> "$HOME/Documents/FantasyBaseballApplications/\
 Output/${teams[$i-1]}"
-    python3 /home/user/Documents/FantasyBaseballApplications/test.py $i P list >> "/home/user/Documents/FantasyBaseballApplications/\
+  python3 $HOME/Documents/FantasyBaseballApplications/test.py $i P list >> "$HOME/Documents/FantasyBaseballApplications/\
 Output/${teams[$i-1]}"
 done
 
@@ -23,8 +23,8 @@ positions=( B C 1B 2B 3B SS OF P SP RP )
 
 for i in {0..9}
 do
-    python3 /home/user/Documents/FantasyBaseballApplications/test.py A ${positions[$i]} list > "/home/user/Documents/\
+  python3 $HOME/Documents/FantasyBaseballApplications/test.py A ${positions[$i]} list > "$HOME/Documents/\
 FantasyBaseballApplications/Output/${positions[$i]}"
 done
 
-date > "/home/user/Documents/FantasyBaseballApplications/Output/LastModified"
+date > "$HOME/Documents/FantasyBaseballApplications/Output/LastModified"
