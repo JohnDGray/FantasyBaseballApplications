@@ -29,7 +29,7 @@ team_names = (
     'pit',
     'sd',
     'sea',
-    'sfg',
+    'sf',
     'stl',
     'tb',
     'tex',
