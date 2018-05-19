@@ -132,12 +132,16 @@ def get_multiple_adjusted_rpg(teams_with_parks):
     avg, stdev = get_avg_stedev([t[1] for t in teams_with_rpg])
     results = []
     for t in teams_with_parks:
-        team_name = t[0]
-        park_team_name = t[1]
+        team_name = t[0].lower()
+        park_team_name = t[1].lower()
+        home_game = len(t) > 2 and t[2]
         team = get_team(team_name, teams_with_rpg, teams_with_park_factors)
         park_factor = [v[1] for v in teams_with_park_factors if v[0] == park_team_name][0]
         print("offense:", team_name)
         print("park:", park_team_name)
         adjusted_rpg = team.get_adjusted_rpg(park_factor)
+        if home_game:
+            unadjusted_rpg = team.get_adjusted_rpg(1)
+            adjusted_rpg = (adjusted_rpg + unadjusted_rpg) / 2
         print("stdevs above avg:", get_stdevs_above_avg(adjusted_rpg, avg, stdev))
         print()
