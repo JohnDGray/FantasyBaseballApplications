@@ -113,7 +113,7 @@ def get_team(team_name, teams_with_rpg, teams_with_park_factors):
     team_with_rpg = next(iter([t for t in teams_with_rpg if t[0] == team_name]), None)
     team_park = next(iter([t for t in teams_with_park_factors if t[0] == team_name]), None)
     if not team_with_rpg or not team_park:
-        raise Exception("Invalid team name")
+        raise Exception("Invalid team name:", team_name)
     team = TeamWithRpgAndParkFactor(team_name, team_with_rpg[1], team_park[1])
     return team
 
@@ -133,8 +133,8 @@ def get_multiple_adjusted_rpg(teams_with_parks):
     results = []
     for t in teams_with_parks:
         team_name = t[0].lower()
-        park_team_name = t[1].lower()
-        home_game = len(t) > 2 and t[2]
+        park_team_name = (len(t) > 1 and t[1].lower()) or team_name
+        home_game = team_name != park_team_name
         team = get_team(team_name, teams_with_rpg, teams_with_park_factors)
         park_factor = [v[1] for v in teams_with_park_factors if v[0] == park_team_name][0]
         print("offense:", team_name)
@@ -145,3 +145,16 @@ def get_multiple_adjusted_rpg(teams_with_parks):
             adjusted_rpg = (adjusted_rpg + unadjusted_rpg) / 2
         print("stdevs above avg:", get_stdevs_above_avg(adjusted_rpg, avg, stdev))
         print()
+
+
+while True:
+    values = input("Usage: team [park]\n")
+    values = values.split()
+    for v in values:
+        if not v in team_names:
+            print("Invalid team name:", v)
+            print()
+            break
+    else:
+        values = [tuple(values)]
+        get_multiple_adjusted_rpg(values)
