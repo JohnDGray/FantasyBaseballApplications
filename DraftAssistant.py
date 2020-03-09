@@ -1,12 +1,29 @@
 import sys
 from csv import reader
 
+#assumed values
+
+projections_path = '/home/myname/Downloads/FantasyValues.csv'
+
+projection_indices = {
+        'name':0,
+        'team':1,
+        'positions':2,
+        'value':4,
+}
+
+position_delimiter = '/'
+
+header_lines = 0
+
+#actual code
+
 class Player():
     def __init__(self, name, team, positions, value):
         self.name = name
         self.team = team
         self.positions = [p.strip() for p in positions if p.strip()]
-        self.value = float(value)
+        self.value = int(value)
 
     def __str__(self):
         result = str(self.name).ljust(20)
@@ -80,16 +97,21 @@ def process_projections(projections_path: str) -> list:
     players = []
     with open(projections_path, 'r') as projections:
         r = reader(projections)
-        next(r)
+        for _ in range(header_lines):
+            next(r)
         for line in r:
             if not line[4]:
                 continue
-            positions = line[3].split('/')
-            p = Player(line[1], line[2], positions, line[5])  
+            nm = line[projection_indices['name']]
+            tm = line[projection_indices['team']]
+            ps = line[projection_indices['positions']]
+            ps = ps.split(position_delimiter)
+            vl = line[projection_indices['value']]
+            p = Player(nm, tm, ps, vl)  
             players.append(p)
     return players
 
-players = process_projections(sys.argv[1])
+players = process_projections(projections_path)
 values = [p.value for p in players]
 draft_states = []
 draft_states.append(FirstDraftState(23, 12, 260, values))
@@ -142,13 +164,19 @@ while True:
             results = [p for p in players if next_value.lower() in p.name.lower()]
         results = [r for r in results if r.value > 0 or abs(r.value) < 10]
         results = results[:40]
+        header_display = str('name').ljust(20)
+        header_display += str('team').ljust(10)
+        header_display += str('mod val').ljust(10)
+        header_display += str('act val').ljust(10)
+        header_display += str('pos').ljust(30)
+        print(header_display)
         for result in results:
             display_value = str(result.name).ljust(20)
-            display_value += str(result.team).ljust(5)
-            display_value += '/'.join(result.positions).ljust(15)
+            display_value += str(result.team).ljust(10)
             display_value += \
                 str(int(modify_value(last_state.slots, result.value))).ljust(10)
             display_value += str(result.value).ljust(10)
+            display_value += '/'.join(result.positions).ljust(30)
             print(display_value)
         print()
         continue

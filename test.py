@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from csv import reader
 import sys
 import requests
-from Modules.FBClasses import Player, get_hitter_positions
+from Modules.FBClasses import Player, get_hitter_positions, get_razzball_players
 #import Modules.FBClasses
 
 team = sys.argv[1]
@@ -62,22 +62,6 @@ sort=OR&sdir=1&count="
 
     #yahoo_players = [p.strip() for p in yahoo_players]
     return yahoo_players
-
-def get_razzball_players():
-    razzball_players = []
-
-    with open('razzball.csv', 'r') as razz_csv:
-        r = reader(razz_csv)
-        next(r)
-        for line in r:
-            pos = line[3].split('/')
-            is_hitter = not any([p for p in pos if 'p' in p.lower()])
-            player = Player(name = line[1].strip(), team = line[2], \
-                            hitter = is_hitter, \
-                            positions = pos, \
-                            value = float(line[4]))
-            razzball_players.append(player)
-    return razzball_players
 
 def get_players_with_values(team: str, position: str):
     yahoo_players = get_yahoo_players(team, position)
