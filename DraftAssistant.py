@@ -37,6 +37,7 @@ class DraftState():
                  sub_index: int):
         self.budget = budget
         self.slots = slots
+        slots_len = len(self.slots)
         self._add_index = add_index
         self._sub_index = sub_index
 
@@ -45,50 +46,74 @@ class DraftState():
                           self._sub_index)
 
     def get_slots(self) -> list:
-        output = self.slots[:]
-        output.sort(reverse = True)
-        return output
+        return [s for s in self.slots if s is not None]
+        # output = self.slots[:]
+        # output.sort(reverse = True)
+        # return output
 
-    def draft(self, value: int) -> None:
-        if value <= 0:
+    def draft(self, draft_value: int) -> None:
+        if draft_value <= 0:
             raise ValueError("cannot draft a player for less than 1 dollar")
-        if value > sum([val-1 for val in self.slots]) + 1:
+        if draft_value > sum([val-1 for val in self.slots if val is not None]) + 1:
             raise ValueError("value exceeds maximum allowable value")
-        self.budget -= value
-        diffs = [abs(value - x) for x in self.slots]
-        index = diffs.index(min(diffs))
-        del self.slots[index]
-        length = len(self.slots)
-        if index <= self._add_index:
-            self._add_index = (self._add_index - 1) % length
-        if index <= self._sub_index:
-            self._sub_index = (self._sub_index - 1) % length
+        index = min(i for i, v in enumerate(self.slots) if v is not None)
+        cur_min = abs(self.slots[index] - draft_value)
+        self.budget -= draft_value
+        for i, slot_value in enumerate(self.slots):
+            if slot_value is not None:
+                cur_diff = abs(slot_value - draft_value)
+                if cur_diff < cur_min:
+                    index = i
+                    cur_min = cur_diff
+        # diffs = [abs(draft_value - x) for x in self.slots if x is not None]
+        # index = diffs.index(min(diffs))
+        self.slots[index] = None
+        # length = len(self.slots)
+        # if index <= self._add_index:
+        #     self._add_index = (self._add_index - 1) % length
+        # if index <= self._sub_index:
+        #     self._sub_index = (self._sub_index - 1) % length
         self.adjust_slots()
 
+    def get_slot_total(self):
+        return sum(s for s in self.slots if s)
+
+    def inc_add_index(self):
+        assert any(True for s in self.slots if s is not None), "No slots left. \
+            Draft is over or something went wrong."
+        slot_len = len(self.slots)
+        self._add_index = (self._add_index + 1) % slot_len
+        while self.slots[self._add_index] is None:
+            self._add_index = (self._add_index + 1) % slot_len
+
+    def inc_sub_index(self):
+        assert any(True for s in self.slots if s and s > 1), "No slots greater than 1 left. \
+            Something went wrong."
+        slot_len = len(self.slots)
+        self._sub_index = (self._sub_index + 1) % slot_len
+        while self.slots[self._sub_index] is None or self.slots[self._sub_index] <= 1:
+            self._sub_index = (self._sub_index + 1) % slot_len
+
     def adjust_slots(self):
-        diff = self.budget - sum(self.slots)
-        length = len(self.slots)
+        diff = self.budget - self.get_slot_total()
         while diff > 0:
-            self._add_index = (self._add_index + 1) % length
+            self.inc_add_index()
             self.slots[self._add_index] += 1
             diff -= 1
         while diff < 0:
-            self._sub_index = (self._sub_index + 1) % length
-            while self.slots[self._sub_index] == 1:
-                self._sub_index = (self._sub_index + 1) % length
+            self.inc_sub_index()
             self.slots[self._sub_index] -= 1
             diff += 1
 
 class FirstDraftState(DraftState):
     def __init__(self, roster_size: int, number_of_teams: int, \
                  budget: int, values: list):
-        values.sort(reverse=True)
+        values = sorted(values, reverse=True)
         slots = []
         for i in range(roster_size):
             index = i * number_of_teams
             subset = values[index:index + number_of_teams]
-            subset = [max(val, 1) for val in subset]
-            subset = [int(val) for val in subset]
+            subset = [max(int(val), 1) for val in subset]
             slots.append(sum(subset) // number_of_teams)
         DraftState.__init__(self, budget, slots, -1, -1)
         self.adjust_slots()
@@ -121,13 +146,16 @@ def get_max_bid(slots):
     return 1 + sum([x-1 for x in slots])
 
 def modify_value(slots, value):
-    max_bid = get_max_bid(slots) 
-    discount_value = 0.9 * value
-    highest_value = max(slots)
-    diff = discount_value - highest_value
-    diff /= 10
-    diff *= 9
-    return min(max_bid, discount_value, highest_value+diff)
+    # max_bid = get_max_bid(slots) 
+    # discount_value = 0.9 * value
+    highest_value = max(s for s in slots if s)
+    # diff = discount_value - highest_value
+    # diff /= 10
+    # diff *= 9
+    if value <= highest_value:
+        return value
+    return int(0.8 * value + 0.2 * highest_value)
+    # return min(max_bid, discount_value, highest_value+diff)
 
 while True:
     last_state = draft_states[-1]
