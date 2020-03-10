@@ -376,7 +376,7 @@ def get_player_str(player):
     nm, tm = str(player.name), str(player.team)
     pos = '/'.join(list(player.positions))
     stats = str(list(player.statistics))
-    value = str(int(player.value)) 
+    value = str(int(round(player.value,0))) 
     return [nm, tm, pos, stats, value]
 
 
