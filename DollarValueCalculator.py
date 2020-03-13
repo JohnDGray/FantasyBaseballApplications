@@ -7,7 +7,7 @@ import re
 import statistics
 
 #assmued values:
-write_output = True
+write_output = False
 steamer_hitter_path = "/home/myname/Downloads/SteamerHitters.csv"
 steamer_pitcher_path = "/home/myname/Downloads/SteamerPitchers.csv"
 yahoo_csv_path = "/home/myname/Downloads/Yahoo.csv"
@@ -439,3 +439,6 @@ if write_output and output_path:
         w = writer(output)
         for p in steamer_with_values:
             w.writerow(get_player_str(p))
+else:
+    for p in steamer_with_values:
+        print(get_player_str(p))
