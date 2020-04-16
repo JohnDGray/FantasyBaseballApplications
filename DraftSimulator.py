@@ -5,7 +5,7 @@ from statistics import mean
 
 #assumed values
 
-number_of_runs = 100
+simulation_runs = 100
 
 proj_path = "/home/myname/Downloads/FantasyValues.csv"
 
@@ -62,7 +62,7 @@ def run_simulation(teams, players, quiet=True):
     hero_team = next(t for t in teams if t.name == 'hero team')
 
     #draft strong players first
-    best_player_indices = [-1, -1, -1]
+    best_player_indices = []
     for best_player_index in best_player_indices:
         best_player = players.pop(best_player_index)
         bid = hero_team.make_bid(best_player)
@@ -120,7 +120,7 @@ def run_simulation(teams, players, quiet=True):
 
 players = get_players(proj_path)
 team_value_lists = defaultdict(list)
-for i in range(1, number_of_runs+1):
+for i in range(1, simulation_runs+1):
     hero_team = Team(name='hero team',overvalue=False)
     teams = [
             Team(name='team1',overvalue=True),
