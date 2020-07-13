@@ -8,7 +8,7 @@ import statistics
 
 #assmued values:
 write_output = False
-output_path = "/home/myname/Downloads/FantasyValues.csv"
+output_path = "/home/myname/Documents/FantasyValues.csv"
 
 rate_stat_qualifiers = {
         'avg':'ab',
