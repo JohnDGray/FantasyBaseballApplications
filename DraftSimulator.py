@@ -7,17 +7,23 @@ from statistics import mean
 
 simulation_runs = 100
 
-proj_path = "/home/myname/Downloads/FantasyValues.csv"
+overbid_amount = 3
+
+hero_team_overbid_amount = 4
+
+hero_team_strong_player_indices = []
+
+proj_path = "/home/myname/Documents/FantasyValues.csv"
 
 Player = namedtuple('Player', 'name team positions value')
 
 class Team:
-    def __init__(self, *, name, overvalue):
+    def __init__(self, *, name, overvalue_amount):
         self.name = name
         self.budget = 260
         self.roster_size = 23
         self.players = []
-        self.overvalue = bool(overvalue)
+        self.overvalue_amount = overvalue_amount
 
     def max_bid(self):
         players_to_draft = self.roster_size - len(self.players) - 1
@@ -30,8 +36,7 @@ class Team:
         if not self.can_still_draft():
             return 0
         val = max(1, player.value)
-        if self.overvalue:
-            val += 1
+        val += self.overvalue_amount
         return min(val, self.max_bid())
 
     def draft_player(self, player, bid):
@@ -45,6 +50,8 @@ def get_players(projections_path):
     with open(projections_path, 'r') as projections:
         r = reader(projections)
         for line in r:
+            if len(line) < 5:
+                continue
             nm, tm, pos, stats, vl = line
             nm = str(nm).strip()
             tm = str(tm).strip()
@@ -59,14 +66,15 @@ def get_players(projections_path):
 
 #simulation
 def run_simulation(teams, players, quiet=True):
+    players = sorted(players, key=lambda p: p.value, reverse=False)
     hero_team = next(t for t in teams if t.name == 'hero team')
 
     #draft strong players first
-    best_player_indices = []
+    best_player_indices = hero_team_strong_player_indices[:]
     for best_player_index in best_player_indices:
         best_player = players.pop(best_player_index)
         bid = hero_team.make_bid(best_player)
-        bid += 3
+        bid += hero_team_overbid_amount
         hero_team.draft_player(best_player, bid)
         if not quiet:
             print(f"{hero_team.name} paid {bid} for {best_player.name}, {best_player.value}. They have ${hero_team.budget} left.")
@@ -102,7 +110,7 @@ def run_simulation(teams, players, quiet=True):
             raise AssertionError(msg)
         total_val = sum(p.value for p in team.players)
         if not quiet:
-            print(f"Team {team.name} used overvalue strategy? {team.overvalue}")
+            print(f"Team {team.name} overvalue amount: {team.overvalue_amount}")
             print(f"Team total value: {total_val}")
             for p in sorted(team.players, key=lambda p: p.value, reverse=True):
                 print(p)
@@ -121,22 +129,22 @@ def run_simulation(teams, players, quiet=True):
 players = get_players(proj_path)
 team_value_lists = defaultdict(list)
 for i in range(1, simulation_runs+1):
-    hero_team = Team(name='hero team',overvalue=False)
+    hero_team = Team(name='hero team',overvalue_amount=hero_team_overbid_amount)
     teams = [
-            Team(name='team1',overvalue=True),
-            Team(name='team2',overvalue=True),
-            Team(name='team3',overvalue=True),
-            Team(name='team4',overvalue=True),
-            Team(name='team5',overvalue=True),
-            Team(name='team6',overvalue=True),
-            Team(name='team7',overvalue=True),
-            Team(name='team8',overvalue=True),
-            Team(name='team9',overvalue=True),
-            Team(name='team10',overvalue=True),
-            Team(name='team11',overvalue=True),
+            Team(name='team1',overvalue_amount=overbid_amount),
+            Team(name='team2',overvalue_amount=overbid_amount),
+            Team(name='team3',overvalue_amount=overbid_amount),
+            Team(name='team4',overvalue_amount=overbid_amount),
+            Team(name='team5',overvalue_amount=overbid_amount),
+            Team(name='team6',overvalue_amount=overbid_amount),
+            Team(name='team7',overvalue_amount=overbid_amount),
+            Team(name='team8',overvalue_amount=overbid_amount),
+            Team(name='team9',overvalue_amount=overbid_amount),
+            Team(name='team10',overvalue_amount=overbid_amount),
+            Team(name='team11',overvalue_amount=overbid_amount),
             hero_team,
             ]
-    teams = run_simulation(teams, list(players))
+    teams = run_simulation(teams, list(players),quiet=True)
     for t in teams:
         team_value_lists[t.name].append(sum(p.value for p in t.players))
 for t, vl in team_value_lists.items():
