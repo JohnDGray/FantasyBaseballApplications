@@ -3,7 +3,7 @@ from csv import reader
 
 #assumed values
 
-projections_path = '/home/myname/Downloads/FantasyValues.csv'
+projections_path = '/home/myname/Documents/FantasyValues.csv'
 
 projection_indices = {
         'name':0,
@@ -125,7 +125,7 @@ def process_projections(projections_path: str) -> list:
         for _ in range(header_lines):
             next(r)
         for line in r:
-            if not line[4]:
+            if len(line) < 5 or not line[4]:
                 continue
             nm = line[projection_indices['name']]
             tm = line[projection_indices['team']]
