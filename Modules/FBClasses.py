@@ -10,9 +10,9 @@ all_positions = frozenset(["c", "1b", "2b", "3b", "ss", "of", "util", "sp", "rp"
 yahoo_name_column=0
 yahoo_dollar_column=2
 
-yahoo_path = "/home/myname/Downloads/Yahoo.csv"
-steamer_hitter_path='/home/myname/Downloads/SteamerHitters.csv'
-steamer_pitcher_path='/home/myname/Downloads/SteamerPitchers.csv'
+yahoo_path = "/home/myname/Documents/Yahoo.csv"
+steamer_hitter_path='/home/myname/Documents/SteamerHitters.csv'
+steamer_pitcher_path='/home/myname/Documents/SteamerPitchers.csv'
 
 steamer_hitter_value_indices = {
     'name':1,
