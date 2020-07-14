@@ -14,6 +14,11 @@ yahoo_path = "/home/myname/Documents/Yahoo.csv"
 steamer_hitter_path='/home/myname/Documents/SteamerHitters.csv'
 steamer_pitcher_path='/home/myname/Documents/SteamerPitchers.csv'
 
+team_name_dict = {
+    'was': 'wsh',
+    'cws': 'chw',
+}
+
 steamer_hitter_value_indices = {
     'name':1,
     'team': 2,
@@ -58,6 +63,12 @@ Player = collections.namedtuple('Player', 'name team positions statistics value'
 
 def clean_str(s):
     return s.strip().lower()
+
+def translate_team_name(team_name):
+    if team_name in team_name_dict:
+        return team_name_dict[team_name]
+    else:
+        return team_name
 
 def player_has_pos(player, position):
     return position in player.positions
@@ -140,6 +151,7 @@ def get_yahoo_players():
             m = re.search('(.+)\s+(\w+)\s+\-([^\-]+)$', nm, re.IGNORECASE)
             nm = clean_str(m.group(1))
             tm = clean_str(m.group(2))
+            tm = translate_team_name(tm)
 
             pos = frozenset(clean_str(s) for s in m.group(3).split(','))
 
@@ -180,6 +192,7 @@ def get_steamer_projections(csv_path, attribute_indices, pos_delimiter, \
             line = [unidecode.unidecode(x) for x in l]
             nm = clean_str(line[name_index])
             tm = clean_str(line[team_index])
+            tm = translate_team_name(tm)
 
             pos = frozenset(clean_str(s) for s in line[position_index].split(pos_delimiter))
 
@@ -218,7 +231,7 @@ def get_player_str(player):
     nm, tm = str(player.name), str(player.team)
     pos = '/'.join(list(player.positions))
     stats = player.statistics and str(list(player.statistics))
-    value = player.value and str(int(round(player.value,0))) 
+    value = (player.value is not None) and str(int(round(player.value,0))) 
     return [x for x in [nm, tm, pos, stats, value] if x]
 
 
