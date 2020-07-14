@@ -7,7 +7,7 @@ import re
 import statistics
 
 #assmued values:
-write_output = False
+write_output = True
 output_path = "/home/myname/Documents/FantasyValues.csv"
 
 rate_stat_qualifiers = {
@@ -107,21 +107,65 @@ def val_above_replacement(players, count_by_position):
             new_players.append(new_player)
     return frozenset(new_players)
 
-def get_dollar_values(players, dollars_by_position):
+# def get_dollar_values(players, dollars_by_position):
+#     new_players = []
+#     players_by_position = fb_classes.group_by_position(players, position_substitutions)
+#     for pos, players in players_by_position.items():
+#         dollars = dollars_by_position[pos]
+#         total_value = sum(max(0, p.value) for p in players)
+#         for player in players:
+#             name = player.name
+#             team = player.team
+#             positions = player.positions
+#             statistics = player.statistics
+#             value = (player.value / total_value) * dollars
+#             new_player = fb_classes.Player(name, team, positions, statistics, value)
+#             new_players.append(new_player)
+#     return new_players
+
+def get_dollars_value_ratios(players, dollars_by_position):
+    dollars_value_ratios = dict()
+    players_by_position = fb_classes.group_by_position(players, position_substitutions)
+    for pos, players in players_by_position.items():
+        # dollars = dollars_by_position[pos]
+        total_value = sum(max(0, p.value) for p in players)
+        dollars_value_ratios[pos] = dollars_by_position[pos] / total_value
+        # for player in players:
+        #     value = (player.value / total_value) * dollars
+    return dollars_value_ratios
+
+def scale_player_values(players, dollars_value_ratios):
     new_players = []
     players_by_position = fb_classes.group_by_position(players, position_substitutions)
     for pos, players in players_by_position.items():
-        dollars = dollars_by_position[pos]
+        scalar = dollars_value_ratios[pos]
         total_value = sum(max(0, p.value) for p in players)
         for player in players:
             name = player.name
             team = player.team
             positions = player.positions
             statistics = player.statistics
-            value = (player.value / total_value) * dollars
+            value = player.value * scalar
             new_player = fb_classes.Player(name, team, positions, statistics, value)
             new_players.append(new_player)
     return new_players
+
+
+# def get_dollar_values(players, dollars_by_position):
+#     new_players = []
+#     players_by_position = fb_classes.group_by_position(players, position_substitutions)
+#     for pos, players in players_by_position.items():
+#         dollars = dollars_by_position[pos]
+#         total_value = sum(max(0, p.value) for p in players)
+#         for player in players:
+#             name = player.name
+#             team = player.team
+#             positions = player.positions
+#             statistics = player.statistics
+#             value = (player.value / total_value) * dollars
+#             new_player = fb_classes.Player(name, team, positions, statistics, value)
+#             new_players.append(new_player)
+#     return new_players
 
 def recalculate_values(players_with_values, position_counts, hitter_stats, pitcher_stats):
     players_limited = limit_by_counts(players_with_values, position_counts)
@@ -211,10 +255,14 @@ while recalc_needed:
 steamer_with_values = val_above_replacement(steamer_with_values, yahoo_position_counts)
 steamer_with_values = sorted(steamer_with_values, key=lambda p: p.value, reverse=True)
 steamer_limited = limit_by_counts(steamer_with_values, yahoo_position_counts)
-steamer_with_values = get_dollar_values(steamer_limited, yahoo_value_by_position)
+dollars_value_ratios = get_dollars_value_ratios(steamer_limited, yahoo_value_by_position)
+steamer_with_values = scale_player_values(steamer_with_values, dollars_value_ratios)
 steamer_with_values = sorted(steamer_with_values, key=lambda p: p.value, reverse=True)
-steamer_by_position = fb_classes.group_by_position(steamer_with_values, position_substitutions)
-steamer_value_by_position = fb_classes.total_value_by_pos(steamer_by_position)
+
+# steamer_with_values = get_dollar_values(steamer_limited, yahoo_value_by_position)
+# steamer_with_values = sorted(steamer_with_values, key=lambda p: p.value, reverse=True)
+# steamer_by_position = fb_classes.group_by_position(steamer_with_values, position_substitutions)
+# steamer_value_by_position = fb_classes.total_value_by_pos(steamer_by_position)
 
 if write_output and output_path:
     with open(output_path, 'w') as output:
