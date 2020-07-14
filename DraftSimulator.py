@@ -1,3 +1,4 @@
+import Modules.FBClasses as fbclasses
 from csv import reader
 from collections import namedtuple, defaultdict
 from random import shuffle
@@ -6,22 +7,40 @@ from statistics import mean
 #assumed values
 
 simulation_runs = 100
+budget_dollars = 260
+total_roster_size = 23
 
-overbid_amount = 3
+overbid_amounts = [
+                   3,
+                   3,
+                   3,
+                   2,
+                   2,
+                   2,
+                   1,
+                   1,
+                   1,
+                   0,
+                   0
+                  ]
 
-hero_team_overbid_amount = 4
+hero_team_overbid_amount = 0
 
+#indices of players to artificially force onto the hero team
+#indices are negative so e.g. -3 refers to the third most valuable player
 hero_team_strong_player_indices = []
 
 proj_path = "/home/myname/Documents/FantasyValues.csv"
 
-Player = namedtuple('Player', 'name team positions value')
+#actual code
+
+Player = fbclasses.Player
 
 class Team:
     def __init__(self, *, name, overvalue_amount):
         self.name = name
-        self.budget = 260
-        self.roster_size = 23
+        self.budget = budget_dollars
+        self.roster_size = total_roster_size
         self.players = []
         self.overvalue_amount = overvalue_amount
 
@@ -57,7 +76,7 @@ def get_players(projections_path):
             tm = str(tm).strip()
             pos = pos.split('/')
             vl = int(vl)
-            p = Player(nm, tm, pos, vl)
+            p = Player(nm, tm, pos, None, vl)
             players.append(p)
 
     players = sorted(players, key=lambda p: p.value)
@@ -103,7 +122,7 @@ def run_simulation(teams, players, quiet=True):
     teams.sort(key=lambda t: t.name, reverse=True)
 
     for team in teams:
-        if len(team.players) != 23:
+        if len(team.players) != total_roster_size:
             num_players = len(team.players)
             budget = team.budget
             msg = f"Team {team.name} has {num_players} players and ${budget} left"
@@ -126,25 +145,63 @@ def run_simulation(teams, players, quiet=True):
         print(f"Total value {total_value}")
     return teams
 
-players = get_players(proj_path)
+players_my_values = get_players(proj_path)
+# players_yahoo_values = fbclasses.get_yahoo_players()
+# all_players = defaultdict(list)
+# for player in players_my_values:
+#     team = player.team
+#     if team == 'cws':
+#         team = 'chw'
+#     elif team == 'was':
+#         team = 'wsh'
+#     name = player.name.split(' ')
+#     player_string = name[0][0] + ' '
+#     player_string += ' '.join(name[1:])
+#     player_string += '/' + team + '/'
+#     if fbclasses.is_hitter(player):
+#         player_string += 'H'
+#     else:
+#         player_string += 'P'
+#     all_players[player_string].append(player)
+# for player in players_yahoo_values:
+#     team = player.team
+#     if team == 'cws':
+#         team = 'chw'
+#     elif team == 'was':
+#         team = 'wsh'
+#     name = player.name.split(' ')
+#     player_string = name[0][0] + ' '
+#     player_string += ' '.join(name[1:])
+#     player_string += '/' + team + '/'
+#     if fbclasses.is_hitter(player):
+#         player_string += 'H'
+#     else:
+#         player_string += 'P'
+#     if player_string in all_players:
+#         all_players[player_string].append(player)
+# for player_string, player_list in all_players.items():
+#     if len(player_list) > 2:
+#         print(f"Overmatched player: {player_string} {player_list}")
+# all_players = [ls for player_string, ls in all_players.items() if len(ls) == 2]
+
 team_value_lists = defaultdict(list)
 for i in range(1, simulation_runs+1):
     hero_team = Team(name='hero team',overvalue_amount=hero_team_overbid_amount)
     teams = [
-            Team(name='team1',overvalue_amount=overbid_amount),
-            Team(name='team2',overvalue_amount=overbid_amount),
-            Team(name='team3',overvalue_amount=overbid_amount),
-            Team(name='team4',overvalue_amount=overbid_amount),
-            Team(name='team5',overvalue_amount=overbid_amount),
-            Team(name='team6',overvalue_amount=overbid_amount),
-            Team(name='team7',overvalue_amount=overbid_amount),
-            Team(name='team8',overvalue_amount=overbid_amount),
-            Team(name='team9',overvalue_amount=overbid_amount),
-            Team(name='team10',overvalue_amount=overbid_amount),
-            Team(name='team11',overvalue_amount=overbid_amount),
+            Team(name='team1',overvalue_amount=overbid_amounts[0]),
+            Team(name='team2',overvalue_amount=overbid_amounts[1]),
+            Team(name='team3',overvalue_amount=overbid_amounts[2]),
+            Team(name='team4',overvalue_amount=overbid_amounts[3]),
+            Team(name='team5',overvalue_amount=overbid_amounts[4]),
+            Team(name='team6',overvalue_amount=overbid_amounts[5]),
+            Team(name='team7',overvalue_amount=overbid_amounts[6]),
+            Team(name='team8',overvalue_amount=overbid_amounts[7]),
+            Team(name='team9',overvalue_amount=overbid_amounts[8]),
+            Team(name='team10',overvalue_amount=overbid_amounts[9]),
+            Team(name='team11',overvalue_amount=overbid_amounts[10]),
             hero_team,
             ]
-    teams = run_simulation(teams, list(players),quiet=True)
+    teams = run_simulation(teams, list(players_my_values),quiet=True)
     for t in teams:
         team_value_lists[t.name].append(sum(p.value for p in t.players))
 for t, vl in team_value_lists.items():
