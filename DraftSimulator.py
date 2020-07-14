@@ -112,9 +112,9 @@ class Team:
             return 0
         player_value = self.draft_value_func(player)
         if not player_value:
-            return 0
-        val = max(1, player_value)
-        val += self.overvalue_amount
+            player_value = 0
+        val = player_value + self.overvalue_amount
+        val = max(1, val)
         return min(val, self.max_bid())
 
     def draft_player(self, player, bid):
@@ -223,16 +223,19 @@ for i in range(1, simulation_runs+1):
     hero_team = Team(name='hero team',overvalue_amount=hero_team_overbid_amount,\
                      draft_value_func=get_my_value)
     teams = [
+            #teams using the actual values
             Team(name='team1',overvalue_amount=overbid_amounts[0], \
-                 draft_value_func=get_yahoo_value),
+                 draft_value_func=get_my_value),
             Team(name='team2',overvalue_amount=overbid_amounts[1], \
-                 draft_value_func=get_yahoo_value),
+                 draft_value_func=get_my_value),
             Team(name='team3',overvalue_amount=overbid_amounts[2], \
-                 draft_value_func=get_yahoo_value),
+                 draft_value_func=get_my_value),
             Team(name='team4',overvalue_amount=overbid_amounts[3], \
-                 draft_value_func=get_yahoo_value),
+                 draft_value_func=get_my_value),
             Team(name='team5',overvalue_amount=overbid_amounts[4], \
-                 draft_value_func=get_yahoo_value),
+                 draft_value_func=get_my_value),
+
+            #teams using yahoo values
             Team(name='team6',overvalue_amount=overbid_amounts[5], \
                  draft_value_func=get_yahoo_value),
             Team(name='team7',overvalue_amount=overbid_amounts[6], \
@@ -247,7 +250,7 @@ for i in range(1, simulation_runs+1):
                  draft_value_func=get_yahoo_value),
             hero_team,
             ]
-    teams = run_simulation(teams, list(players_my_values),quiet=False)
+    teams = run_simulation(teams, list(players_my_values),quiet=True)
     for t in teams:
         team_value_lists[t.name].append(sum(p.value for p in t.players))
 for t, vl in team_value_lists.items():
