@@ -11,15 +11,15 @@ budget_dollars = 260
 total_roster_size = 23
 
 overbid_amounts = [
-                   3,
-                   3,
-                   3,
-                   2,
-                   2,
-                   2,
-                   1,
-                   1,
-                   1,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
+                   0,
                    0,
                    0
                   ]
@@ -35,34 +35,6 @@ proj_path = "/home/myname/Documents/FantasyValues.csv"
 #actual code
 
 Player = fbclasses.Player
-
-class Team:
-    def __init__(self, *, name, overvalue_amount):
-        self.name = name
-        self.budget = budget_dollars
-        self.roster_size = total_roster_size
-        self.players = []
-        self.overvalue_amount = overvalue_amount
-
-    def max_bid(self):
-        players_to_draft = self.roster_size - len(self.players) - 1
-        return self.budget - players_to_draft
-
-    def can_still_draft(self):
-        return len(self.players) < self.roster_size
-
-    def make_bid(self, player):
-        if not self.can_still_draft():
-            return 0
-        val = max(1, player.value)
-        val += self.overvalue_amount
-        return min(val, self.max_bid())
-
-    def draft_player(self, player, bid):
-        assert self.can_still_draft(), f"Team {self.name} is full"
-        assert bid <= self.max_bid(), f"{self.name} Bid over max bid"
-        self.players.append(player)
-        self.budget -= bid
 
 def get_players(projections_path):
     players = []
@@ -82,6 +54,75 @@ def get_players(projections_path):
     players = sorted(players, key=lambda p: p.value)
 
     return players
+
+players_my_values = get_players(proj_path)
+players_yahoo_values = fbclasses.get_yahoo_players()
+
+def get_player_string(player):
+    team = fbclasses.translate_team_name(player.team)
+    name = player.name.split(' ')
+    player_string = name[0][0] + '_'
+    player_string += '_'.join(name[1:])
+    player_string += '/' + team + '/'
+    if fbclasses.is_hitter(player):
+        player_string += 'H'
+    else:
+        player_string += 'P'
+    return player_string
+
+my_value_dict = {get_player_string(p): p.value for p in players_my_values}
+yahoo_value_dict = {get_player_string(p): p.value for p in players_yahoo_values}
+
+def get_my_value(player):
+    player_string = get_player_string(player)
+    if player_string in my_value_dict:
+        return my_value_dict[player_string]
+    elif player_string in yahoo_value_dict:
+        return yahoo_value_dict[player_string]
+    else:
+        return None
+
+def get_yahoo_value(player):
+    player_string = get_player_string(player)
+    if player_string in yahoo_value_dict:
+        return yahoo_value_dict[player_string]
+    elif player_string in my_value_dict:
+        return my_value_dict[player_string]
+    else:
+        return None
+
+class Team:
+    def __init__(self, *, name, overvalue_amount, draft_value_func=get_my_value):
+        self.name = name
+        self.budget = budget_dollars
+        self.roster_size = total_roster_size
+        self.players = []
+        self.overvalue_amount = overvalue_amount
+        self.draft_value_func = draft_value_func
+
+    def max_bid(self):
+        players_to_draft = self.roster_size - len(self.players) - 1
+        return self.budget - players_to_draft
+
+    def can_still_draft(self):
+        return len(self.players) < self.roster_size
+
+    def make_bid(self, player):
+        if not self.can_still_draft():
+            return 0
+        player_value = self.draft_value_func(player)
+        if not player_value:
+            return 0
+        val = max(1, player_value)
+        val += self.overvalue_amount
+        return min(val, self.max_bid())
+
+    def draft_player(self, player, bid):
+        assert self.can_still_draft(), f"Team {self.name} is full"
+        assert bid <= self.max_bid(), f"{self.name} Bid over max bid"
+        self.players.append(player)
+        self.budget -= bid
+
 
 #simulation
 def run_simulation(teams, players, quiet=True):
@@ -145,15 +186,10 @@ def run_simulation(teams, players, quiet=True):
         print(f"Total value {total_value}")
     return teams
 
-players_my_values = get_players(proj_path)
-# players_yahoo_values = fbclasses.get_yahoo_players()
 # all_players = defaultdict(list)
+
 # for player in players_my_values:
-#     team = player.team
-#     if team == 'cws':
-#         team = 'chw'
-#     elif team == 'was':
-#         team = 'wsh'
+#     team = fbclasses.translate_team_name(player.team)
 #     name = player.name.split(' ')
 #     player_string = name[0][0] + ' '
 #     player_string += ' '.join(name[1:])
@@ -164,11 +200,7 @@ players_my_values = get_players(proj_path)
 #         player_string += 'P'
 #     all_players[player_string].append(player)
 # for player in players_yahoo_values:
-#     team = player.team
-#     if team == 'cws':
-#         team = 'chw'
-#     elif team == 'was':
-#         team = 'wsh'
+#     team = fbclasses.translate_team_name(player.team)
 #     name = player.name.split(' ')
 #     player_string = name[0][0] + ' '
 #     player_string += ' '.join(name[1:])
@@ -182,26 +214,40 @@ players_my_values = get_players(proj_path)
 # for player_string, player_list in all_players.items():
 #     if len(player_list) > 2:
 #         print(f"Overmatched player: {player_string} {player_list}")
+#     elif len(player_list) < 2:
+#         print(f"Unmatched player: {player_string} {player_list}")
 # all_players = [ls for player_string, ls in all_players.items() if len(ls) == 2]
 
 team_value_lists = defaultdict(list)
 for i in range(1, simulation_runs+1):
-    hero_team = Team(name='hero team',overvalue_amount=hero_team_overbid_amount)
+    hero_team = Team(name='hero team',overvalue_amount=hero_team_overbid_amount,\
+                     draft_value_func=get_my_value)
     teams = [
-            Team(name='team1',overvalue_amount=overbid_amounts[0]),
-            Team(name='team2',overvalue_amount=overbid_amounts[1]),
-            Team(name='team3',overvalue_amount=overbid_amounts[2]),
-            Team(name='team4',overvalue_amount=overbid_amounts[3]),
-            Team(name='team5',overvalue_amount=overbid_amounts[4]),
-            Team(name='team6',overvalue_amount=overbid_amounts[5]),
-            Team(name='team7',overvalue_amount=overbid_amounts[6]),
-            Team(name='team8',overvalue_amount=overbid_amounts[7]),
-            Team(name='team9',overvalue_amount=overbid_amounts[8]),
-            Team(name='team10',overvalue_amount=overbid_amounts[9]),
-            Team(name='team11',overvalue_amount=overbid_amounts[10]),
+            Team(name='team1',overvalue_amount=overbid_amounts[0], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team2',overvalue_amount=overbid_amounts[1], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team3',overvalue_amount=overbid_amounts[2], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team4',overvalue_amount=overbid_amounts[3], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team5',overvalue_amount=overbid_amounts[4], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team6',overvalue_amount=overbid_amounts[5], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team7',overvalue_amount=overbid_amounts[6], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team8',overvalue_amount=overbid_amounts[7], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team9',overvalue_amount=overbid_amounts[8], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team10',overvalue_amount=overbid_amounts[9], \
+                 draft_value_func=get_yahoo_value),
+            Team(name='team11',overvalue_amount=overbid_amounts[10], \
+                 draft_value_func=get_yahoo_value),
             hero_team,
             ]
-    teams = run_simulation(teams, list(players_my_values),quiet=True)
+    teams = run_simulation(teams, list(players_my_values),quiet=False)
     for t in teams:
         team_value_lists[t.name].append(sum(p.value for p in t.players))
 for t, vl in team_value_lists.items():
